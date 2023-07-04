@@ -638,12 +638,26 @@ describe('ConfigParser', () => {
         it('should overwrite capabilities', async () => {
             const configParser = await ConfigParserForTest(FIXTURES_CONF)
             await configParser.initialize()
+            console.log(configParser.getConfig())
             expect(configParser.getCapabilities()).toMatchObject([{ browserName: 'chrome' }])
             configParser['merge']({
                 capabilities: [{ browserName: 'safari' }],
             })
 
             expect(configParser.getCapabilities()).toMatchObject([{ browserName: 'safari' }])
+        })
+
+        it('should dedupe capabilities passed into initialize or merge', async () => {
+            const configParser = await ConfigParserForTest(FIXTURES_CONF)
+            await configParser.initialize({ capabilities: [{ browserName: 'chrome' }] })
+
+            expect(configParser.getCapabilities()).toMatchObject([{ browserName: 'chrome' }])
+            configParser['merge']({
+                capabilities: [{ browserName: 'chrome' }],
+            })
+
+            expect(configParser.getCapabilities()).toMatchObject([{ browserName: 'chrome' }])
+
         })
     })
 

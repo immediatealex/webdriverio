@@ -1,7 +1,7 @@
 import path from 'node:path'
 
 import logger from '@wdio/logger'
-import { deepmerge } from 'deepmerge-ts'
+import { deepmerge, deepmergeCustom } from 'deepmerge-ts'
 import type { Capabilities, Options, Services } from '@wdio/types'
 
 import RequireLibrary from './RequireLibrary.js'
@@ -167,7 +167,22 @@ export default class ConfigParser {
     private merge(object: MergeConfig = {}) {
         const spec = Array.isArray(object.spec) ? object.spec : []
         const exclude = Array.isArray(object.exclude) ? object.exclude : []
-        this._config = deepmerge(this._config, object) as TestrunnerOptionsWithParameters
+
+        const customDeepMerge = deepmergeCustom({
+            mergeArrays: (values, utils, meta) => {
+                if (meta?.key !== 'capabilities') {
+                    return utils.defaultMergeFunctions.mergeArrays(values)
+                }
+
+                return (values as Readonly<Readonly<Capabilities.Capabilities[]>[]>)
+                    .reduce((flattened, current) => [...flattened, ...current], [])
+                    .filter((capability, index, array) => {
+                        const firstIndex = array.findIndex(({ browserName }) => browserName === capability.browserName)
+                        return index === firstIndex
+                    })
+            },
+        })
+        this._config = customDeepMerge(this._config, object) as TestrunnerOptionsWithParameters
 
         /**
          * overwrite config specs that got piped into the wdio command
