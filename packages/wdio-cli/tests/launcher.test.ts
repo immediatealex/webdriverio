@@ -729,4 +729,9 @@ describe('launcher cjs', () => {
         expect(typeof (cjsLauncher as any)).toBe('function')
         expect(typeof (cjsRun as any)).toBe('function')
     })
+
+    it('should allow the run method to be invoked immediately after instantiation', () => {
+        const CjsLauncher = new cjsLauncher()
+        expect(() => CjsLauncher.run()).not.toThrow()
+    })
 })
