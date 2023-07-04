@@ -177,9 +177,7 @@ export default class ConfigParser {
                 return (values as Readonly<Readonly<Capabilities.Capabilities[]>[]>)
                     .reduce((flattened, current) => [...flattened, ...current], [])
                     .filter((capability, index, array) => {
-                        const firstIndex = array.findIndex(
-                            ({ browserName }) => browserName === capability.browserName,
-                        )
+                        const firstIndex = array.findIndex(({ browserName }) => browserName === capability.browserName)
                         return index === firstIndex
                     })
             },
